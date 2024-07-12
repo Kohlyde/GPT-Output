@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Receipt Generator</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+  <style>
+    body,
+    html {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      background-color: #121212;
+      color: #E0E0E0;
+    }
+
+    .navbar-main {
+      width: 100%;
+      background-color: #1B1B1B;
+    }
+
+    .coding-pad,
+    .receipt-display {
+      padding: 20px;
+      height: calc(100vh - 80px);
+      overflow-y: auto;
+      background-color: #1E1E1E;
+      color: #FFFFFF;
+      border: none;
+    }
+
+    .coding-pad {
+      border-right: 2px solid #333;
+    }
+
+    .receipt-display {
+      background-color: #263238;
+      white-space: pre-wrap;
+    }
+
+    button {
+      background-color: #0D47A1;
+      color: #FFFFFF;
+      border: none;
+    }
+
+    button:hover {
+      background-color: #1565C0;
+    }
+
+    textarea {
+      width: 100%;
+      height: 85%;
+      background-color: #333333;
+      color: #DDDDDD;
+      border: 1px solid #444;
+    }
+
+    .svg-upload-container {
+      background-color: #333;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .svg-upload-input,
+    .svg-upload-btn {
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .svg-display-flex {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .svg-display-area {
+      width: 80mm;
+      height: calc(85vh - 60px);
+      background-color: #444;
+      border: 1px solid #666;
+      padding: 10px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    .svg-display-title {
+      margin-bottom: 10px;
+    }
+  </style>
+  <script>
+    function uploadAndDisplaySVG() {
+      const fileInput = document.getElementById('svgUpload');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert('Please select a file.');
+        return;
+      }
+
+      if (file.type !== 'image/svg+xml') {
+        alert('Please upload a valid SVG file.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(e.target.result, "image/svg+xml");
+        const svg = svgDoc.documentElement;
+
+        if (!svg || svg.nodeName !== 'svg') {
+          alert('The uploaded file is not a valid SVG document.');
+          return;
+        }
+
+        document.getElementById('svgDisplay1').innerHTML = svg.outerHTML;
+        document.getElementById('svgDisplay2').innerHTML = svg.outerHTML;
+      };
+
+      reader.readAsText(file);
+    }
+
+    function executeCode() {
+      try {
+        const code = document.getElementById('codeInput').value;
+        const result = Function('"use strict";return (' + code + ')')();
+        document.getElementById('receiptOutput').innerText = result;
+      } catch (e) {
+        document.getElementById('receiptOutput').innerText = 'Error: ' + e.message;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      document.getElementById('uploadBtn').addEventListener('click', function () {
+        const fileInput = document.getElementById('svgUpload');
+        const file = fileInput.files[0];
+
+        if (!file) {
+          alert('No file selected.');
+          return;
+        }
+
+        if (file.type !== 'image/svg+xml') {
+          alert('Please upload a valid SVG file.');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const parser = new DOMParser();
+          const svgDoc = parser.parseFromString(e.target.result, "image/svg+xml");
+          const svg = svgDoc.documentElement;
+
+          const svgWidth = svg.width.baseVal.valueInSpecifiedUnits;
+          const svgHeight = svg.height.baseVal.value;
+
+          if (svgWidth !== 80 || svgHeight < 100) {
+            alert('SVG does not meet the size requirements. Width must be exactly 80mm and height at least 100px.');
+            return;
+          }
+
+          const requiredTags = ['title'];
+          let tagsValid = requiredTags.every(tag => svg.querySelector(tag));
+
+          if (!tagsValid) {
+            alert('SVG does not contain all required tags.');
+            return;
+          }
+
+          document.getElementById('svgDisplay1').innerHTML = svg.outerHTML;
+          document.getElementById('svgDisplay2').innerHTML = svg.outerHTML;
+        };
+        reader.readAsText(file);
+      });
+    });
+  </script>
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-main">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav ml-auto">
+        <a class="nav-link" href="#home">Home</a>
+        <a class="nav-link" href="#about">About</a>
+        <a class="nav-link" href="#music">Music</a>
+        <a class="nav-link" href="#sample-packs">Sample Packs</a>
+        <a class="nav-link" href="#contact">Contact</a>
+        <a class="nav-link" href="tel:+123456789"><i class="fas fa-phone"></i></a>
+        <a class="nav-link" href="mailto:example@gmail.com"><i class="fas fa-envelope"></i></a>
+        <a class="nav-link" href="https://github.com/"><i class="fab fa-github"></i></a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-6 coding-pad">
+        <h4>Coding Pad</h4>
+        <textarea id="codeInput" placeholder="Type your JS code here..."></textarea>
+        <button class="btn btn-primary mt-2" onclick="executeCode()">Execute</button>
+      </div>
+      <div class="svg-upload-container col-md-6">
+        <h2 class="svg-upload-title">SVG Upload and Display</h2>
+        <input type="file" id="svgUpload" accept=".svg" class="svg-upload-input">
+        <button class="svg-upload-btn" onclick="uploadAndDisplaySVG()">Upload SVG</button>
+        <div class="svg-display-flex">
+          <div class="svg-display-area" style="margin-right: auto;">
+            <h4 class="svg-display-title">Loaded SVG</h4>
+            <div id="svgDisplay1" class="svg-display"></div>
+          </div>
+          <div class="svg-display-area" style="margin-left: auto;">
+            <h4 class="svg-display-title">Created SVG</h4>
+            <div id="svgDisplay2" class="svg-display"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

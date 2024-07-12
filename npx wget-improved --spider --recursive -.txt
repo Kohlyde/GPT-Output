@@ -1,0 +1,1 @@
+npx wget-improved --spider --recursive --level=5 --no-verbose --output-file=wget-log.txt https://edmc.nu
